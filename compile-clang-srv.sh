@@ -32,8 +32,8 @@ git clone https://github.com/rama982/AnyKernel2
 
 # Push to Channel
 function push() {
-    JIP=${ZIP_DIR}/$ZIP
-    curl -F document=@"$JIP"  "https://api.telegram.org/bot$BOT_API_KEY/sendDocument" \
+    JIP=$(echo Genom*.zip)
+    curl -F document=@$JIP  "https://api.telegram.org/bot$BOT_API_KEY/sendDocument" \
 	 -F chat_id="-1001382306754"
 }
 
@@ -159,17 +159,15 @@ echo
 
 make_kernel
 
-break
+DATE_END=$(date +"%s")
+DIFF=$(($DATE_END - $DATE_START))
 
 echo -e "${green}"
 echo "-------------------"
-echo "Build Completed in:"
+echo "Build Completed in: $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds."
 echo "-------------------"
 echo -e "${restore}"
 
-DATE_END=$(date +"%s")
-DIFF=$(($DATE_END - $DATE_START))
-echo "Time: $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds."
 echo
 
 if ! [ -a $KERN_IMG ]; then
@@ -183,14 +181,10 @@ else
     cp $DTB_T $ZIP_DIR/treble/msm8953-qrd-sku3-e7-treble.dtb
     cp $DTB $ZIP_DIR/nontreble/msm8953-qrd-sku3-e7-non-treble.dtb
     make normal &>/dev/null
-    cd ..
+    echo Genom*.zip
     echo -e "$purple(i) Flashable zip generated under $ZIP_DIR."
-    NAME=Genom
-    DATE=$(date "+%Y%m%d-%I%M")
-    CODE=Pie-Kombo
-    ZIP=${NAME}-${CODE}-${DATE}.zip
-    echo "${ZIP_DIR}/$ZIP"
     push
+    cd ..
     fin
 fi
 
