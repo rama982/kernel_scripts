@@ -25,7 +25,7 @@ KERNEL_DIR=${HOME}/kernel_xiaomi_msm8953_vince
 KERN_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz
 DTB=$KERNEL_DIR/out/arch/arm64/boot/dts/qcom/msm8953-qrd-sku3-e7-non-treble.dtb
 DTB_T=$KERNEL_DIR/out/arch/arm64/boot/dts/qcom/msm8953-qrd-sku3-e7-treble.dtb
-ZIP_DIR=$KERNEL_DIR/Zipper
+ZIP_DIR=$KERNEL_DIR/AnyKernel2
 CONFIG_DIR=$KERNEL_DIR/arch/arm64/configs
 
 #Move to kernel directory
