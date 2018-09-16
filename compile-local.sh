@@ -130,9 +130,9 @@ if [ "$choice" == "4" ]; then
   cd $ZIP_DIR
   make clean &>/dev/null
   cp $KERN_IMG $ZIP_DIR/kernel/Image.gz
-  cp $DTB_T $ZIP_DIR/kernel/treble/msm8953-qrd-sku3-e7-treble.dtb
-  cp $DTB $ZIP_DIR/kernel/normal/msm8953-qrd-sku3-e7-non-treble.dtb
-     make normal &>/dev/null
+  cp $DTB_T $ZIP_DIR/treble/msm8953-qrd-sku3-e7-treble.dtb
+  cp $DTB $ZIP_DIR/nontreble/msm8953-qrd-sku3-e7-non-treble.dtb
+  make normal &>/dev/null
   cd ..
   echo -e "$purple(i) Flashable zip generated under $ZIP_DIR.$nc"
   echo -e "$cyan#######################################################################$nc"
