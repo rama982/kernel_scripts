@@ -10,8 +10,8 @@ sudo apt-add-repository -s "deb http://apt.llvm.org/trusty/ llvm-toolchain-trust
 sudo apt-add-repository -s "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main"
 sudo apt-add-repository -s "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-7 main"
 sudo apt-add-repository "deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu trusty main"
-sudo apt update
-sudo apt-get install clang-8 lldb-8 lld-8 bc ccache gcc-aarch64-linux-gnu -y
+install-package --update
+install-package clang-8 lldb-8 lld-8 bc ccache gcc-aarch64-linux-gnu -y
 
 #Directories
 KERNEL_DIR=${HOME}/kernel_xiaomi_msm8953_vince
