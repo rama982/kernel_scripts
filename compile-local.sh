@@ -35,8 +35,6 @@ cd $KERNEL_DIR
 export ARCH=arm64
 export SUBARCH=arm64
 export PATH=/usr/lib/ccache:$PATH
-export KBUILD_BUILD_USER="Ramakun"
-export KBUILD_BUILD_HOST="Warnet-Nettaholic-2"
 
 #Misc
 CONFIG=genom_defconfig
@@ -58,7 +56,7 @@ echo -e "\n$green[1] Build Kernel (STOCK GCC)"
 echo -e "[2] Regenerate defconfig"
 echo -e "[3] Source cleanup"
 echo -e "[4] Create flashable zip"
-echo -e "[5] Upload Created Zip File"
+echo -e "[5] Upload Created Zip File (gdrive)"
 echo -e "$red[6] Quit$nc"
 echo -ne "\n$brown(i) Please enter a choice[1-6]:$nc "
 
@@ -109,6 +107,7 @@ fi
 if [ "$choice" == "2" ]; then
   echo -e "\n$cyan#######################################################################$nc"
   make O=out  $CONFIG
+  cp out/.config arch/arm64/configs/vince_defconfig
   cp out/.config arch/arm64/configs/$CONFIG
   echo -e "$purple(i) Defconfig generated.$nc"
   echo -e "$cyan#######################################################################$nc"
