@@ -37,7 +37,7 @@ export SUBARCH=arm64
 export PATH=/usr/lib/ccache:$PATH
 
 #Misc
-CONFIG=genom_defconfig
+CONFIG=vince_defconfig
 THREAD="-j2"
 
 # Here We Go
@@ -106,9 +106,9 @@ fi
 
 if [ "$choice" == "2" ]; then
   echo -e "\n$cyan#######################################################################$nc"
-  make O=out  $CONFIG
-  cp out/.config arch/arm64/configs/vince_defconfig
-  cp out/.config arch/arm64/configs/$CONFIG
+  make O=out  $CONFIG savedefconfig
+  cp out/.config arch/arm64/configs/vince-full_defconfig
+  cp out/defconfig arch/arm64/configs/$CONFIG
   echo -e "$purple(i) Defconfig generated.$nc"
   echo -e "$cyan#######################################################################$nc"
 fi
