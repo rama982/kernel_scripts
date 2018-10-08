@@ -64,9 +64,10 @@ read choice
 
 if [ "$choice" == "1" ]; then
   
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 --depth=1 stock  
 echo -e "\n$green building with stock GCC..."
 CROSS_COMPILE+="ccache "
-CROSS_COMPILE+="/usr/bin/aarch64-linux-gnu-"
+CROSS_COMPILE+="$PWD/stock/bin/aarch64-linux-android-"
 export CROSS_COMPILE
 make  O=out $CONFIG $THREAD
 make  O=out $THREAD & pid=$!   
