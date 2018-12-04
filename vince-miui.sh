@@ -132,7 +132,7 @@ echo -e "\n$green###############################################################
 echo -e "\n$green Strip and move miui modules to AnyKernel2..."
 # thanks to @adekmaulana
   cd $ZIP_DIR
-  make clean
+  make clean &>/dev/null
   cd ..
   OUTDIR="$PWD/out/"
   SRCDIR="$PWD/"
