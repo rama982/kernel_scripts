@@ -172,7 +172,11 @@ sed -e 's/gcc/strip/')"
   fi
   cd $ZIP_DIR
   cp $KERN_IMG $ZIP_DIR/kernel/Image.gz
+  if [ "$branch" = "msm-3.18-o-miui-eas-dev" ]; then
+  cp $DTB $ZIP_DIR/nontreble/msm8953-qrd-sku3-vince.dtb
+  else
   cp $DTB $ZIP_DIR/treble/msm8953-qrd-sku3-vince.dtb
+  fi
   make normal &>/dev/null
   echo Genom*.zip
   echo -e "$purple(i) Flashable zip generated under $ZIP_DIR."
