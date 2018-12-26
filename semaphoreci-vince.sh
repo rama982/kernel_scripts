@@ -4,27 +4,29 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # Directories and package
-KERNEL_DIR=${HOME}/android_kernel_xiaomi_vince-caf
-KERN_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz
+KERNEL_DIR=${HOME}/android_kernel_xiaomi_msm8953
+KERN_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb
 ZIP_DIR=$KERNEL_DIR/AnyKernel2
-DTB=$KERNEL_DIR/out/arch/arm64/boot/dts/qcom/msm8953-qrd-sku3-vince-hax.dtb
 
 # Detect which branch we now
 branch="$(git rev-parse --abbrev-ref HEAD)"
 
+# Clone toolchain
 git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 --depth=1 stock
 
+# Install build package
 install-package --update-new ccache bc bash git-core gnupg build-essential \
 	zip curl make automake autogen autoconf autotools-dev libtool shtool python \
 	m4 gcc libtool zlib1g-dev
 		
-
 # Move to kernel directory
 cd $KERNEL_DIR
-if [ "$branch" = "msm-3.18-o-miui-eas-dev" ]; then
-git clone https://github.com/rama982/AnyKernel2 -b vince-miui
+
+# Clone AnyKernel2
+if [ "$branch" = "vince/oreo-eas-miui" ]; then
+	git clone https://github.com/rama982/AnyKernel2 -b vince-miui
 else
-git clone https://github.com/rama982/AnyKernel2 -b vince-aosp
+	git clone https://github.com/rama982/AnyKernel2 -b vince-aosp
 fi
 
 #
@@ -33,7 +35,7 @@ fi
 
 git clone https://github.com/fabianonline/telegram.sh telegram
 
-TELEGRAM_ID=-1001232319637
+TELEGRAM_ID=-1001479956662
 
 TELEGRAM=telegram/telegram
 TELEGRAM_TOKEN=${BOT_API_KEY}
@@ -57,7 +59,6 @@ function tg_channelcast() {
 		)"
 }
 
-
 function tg_sendinfo() {
     curl -s "https://api.telegram.org/bot$BOT_API_KEY/sendMessage" \
          -d "parse_mode=markdown" \
@@ -68,28 +69,20 @@ function tg_sendinfo() {
 
 # Errored Prober
 function finerr() {
-    tg_sendinfo "$(echo -e "Build took $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds\nbut it's error...")"
-    exit 1
+	tg_sendinfo "$(echo -e "Build took $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds\nbut it's error...")"
+	exit 1
 }
 
-
+# Send sticker
 function tg_sendstick() {
-    curl -s -X POST "https://api.telegram.org/bot$BOT_API_KEY/sendSticker" \
-         -d sticker="CAADBQADWAUAAs_rwQcJSj1jS_tMZwI" \
-         -d chat_id="$TELEGRAM_ID" >> /dev/null
+	curl -s -X POST "https://api.telegram.org/bot$BOT_API_KEY/sendSticker" \
+		-d sticker="CAADBQADgQADuMZ9GebdeJ3qOSmSAg" \
+		-d chat_id="$TELEGRAM_ID" >> /dev/null
 }
-
-
-# Announce the completion
-function tg_yay() {
-    tg_channelcast "Seem like compilation completed." \
-		"Uploading installer file..."
- }
 
 # Fin Prober
 function fin() {
-     tg_sendinfo "$(echo "Build took $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds.")"
-
+	tg_sendinfo "$(echo "Build took $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds.")"
 }
 
 #
@@ -102,7 +95,7 @@ BUILD_START=$(date +"%s")
 
 tg_sendstick
 
-if [ "$branch" = "msm-3.18-o-miui-eas-dev" ]; then
+if [ "$branch" = "vince/oreo-eas-miui" ]; then
 tg_channelcast "<b>GENOM MIUI</b> kernel new build!" \
 	"Started on <code>$(hostname)</code>" \
 	"For device <b>VINCE</b> (Redmi 5 Plus)" \
@@ -141,12 +134,11 @@ if ! [ -a $KERN_IMG ]; then
     finerr
     exit 1
 else
-  tg_yay
   cd $ZIP_DIR
   make clean &>/dev/null
   cd ..
 # for miui
-  if [ "$branch" = "msm-3.18-o-miui-eas-dev" ]; then
+  if [ "$branch" = "vince/oreo-eas-miui" ]; then
   OUTDIR="$PWD/out/"
   SRCDIR="$PWD/"
   MODULEDIR="$PWD/AnyKernel2/modules/system/lib/modules/"
@@ -171,19 +163,11 @@ sed -e 's/gcc/strip/')"
   done
   fi
   cd $ZIP_DIR
-  cp $KERN_IMG $ZIP_DIR/kernel/Image.gz
-  if [ "$branch" = "msm-3.18-o-miui-eas-dev" ]; then
-  cp $DTB $ZIP_DIR/nontreble/msm8953-qrd-sku3-vince.dtb
-  else
-  cp $DTB $ZIP_DIR/treble/msm8953-qrd-sku3-vince.dtb
-  fi
+  cp $KERN_IMG $ZIP_DIR/zImage
   make normal &>/dev/null
   echo Genom*.zip
-  echo -e "$purple(i) Flashable zip generated under $ZIP_DIR."
+  echo "Flashable zip generated under $ZIP_DIR."
   push
   cd ..
   fin
 fi
-
-
-

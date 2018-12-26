@@ -28,7 +28,7 @@ CONFIG_DIR=$KERNEL_DIR/arch/arm64/configs
 
 # Move to kernel directory
 cd $KERNEL_DIR
-git clone https://github.com/rama982/AnyKernel2
+git clone https://github.com/rama982/AnyKernel2 -b vince-aosp
 
 # Exports
 export ARCH=arm64
@@ -53,7 +53,7 @@ echo -e "---------------------------------------------------------------------";
 
 # Main script
 while true; do
-echo -e "\n$green[1] Build Vince MIUI Kernel (with Google GCC)"
+echo -e "\n$green[1] Build vince kernel (with Google GCC)"
 echo -e "[2] Regenerate defconfig"
 echo -e "[3] Source cleanup"
 echo -e "[4] Create flashable zip"
@@ -69,8 +69,8 @@ echo -e "\n$green building with Google GCC..."
 CROSS_COMPILE+="ccache "
 CROSS_COMPILE+="$PWD/stock/bin/aarch64-linux-android-"
 export CROSS_COMPILE
-make  O=out $CONFIG $THREAD
-make  O=out $THREAD & pid=$!   
+make  O=out_vince-oreo-caf $CONFIG $THREAD
+make  O=out_vince-oreo-caf $THREAD & pid=$!   
 
 BUILD_START=$(date +"%s")
 DATE=`date`
@@ -108,9 +108,9 @@ fi
 
 if [ "$choice" == "2" ]; then
   echo -e "\n$cyan#######################################################################$nc"
-  make O=out  $CONFIG savedefconfig
-  cp out/.config arch/arm64/configs/vince-full_defconfig
-  cp out/defconfig arch/arm64/configs/$CONFIG
+  make O=out_vince-oreo-caf  $CONFIG savedefconfig
+  cp out_vince-oreo-caf/.config arch/arm64/configs/vince-full_defconfig
+  cp out_vince-oreo-caf/defconfig arch/arm64/configs/$CONFIG
   echo -e "$purple(i) Defconfig generated.$nc"
   echo -e "$cyan#######################################################################$nc"
 fi
@@ -118,9 +118,9 @@ fi
 if [ "$choice" == "3" ]; then
   echo -e "\n$cyan#######################################################################$nc"
   rm -f $DT_IMG
-  make O=out clean &>/dev/null
+  make O=out_vince-oreo-caf clean &>/dev/null
   make mrproper &>/dev/null
-  rm -rf out/*
+  rm -rf out_vince-oreo-caf/*
   echo -e "$purple(i) Kernel source cleaned up.$nc"
   echo -e "$cyan#######################################################################$nc"
 fi
@@ -128,33 +128,6 @@ fi
 
 if [ "$choice" == "4" ]; then
 echo -e "\n$green#######################################################################$nc"
-echo -e "\n$green Strip and move miui modules to AnyKernel2..."
-# thanks to @adekmaulana
-  cd $ZIP_DIR
-  make clean &>/dev/null
-  cd ..
-  OUTDIR="$PWD/out/"
-  SRCDIR="$PWD/"
-  MODULEDIR="$PWD/Zipper/modules/system/lib/modules/"
-  PRONTO=${MODULEDIR}pronto/pronto_wlan.ko
-
-  STRIP="$PWD/stock/bin/$(echo "$(find "$PWD/stock/bin" -type f -name "aarch64-*-gcc")" | awk -F '/' '{print $NF}' |\
-sed -e 's/gcc/strip/')"
-
-  for MOD in $(find "${OUTDIR}" -name '*.ko') ; do
-      "${STRIP}" --strip-unneeded --strip-debug "${MOD}" &> /dev/null
-      "${SRCDIR}"/scripts/sign-file sha512 \
-                                  "${OUTDIR}/signing_key.priv" \
-                                  "${OUTDIR}/signing_key.x509" \
-                                  "${MOD}"
-      find "${OUTDIR}" -name '*.ko' -exec cp {} "${MODULEDIR}" \;
-      case ${MOD} in
-
-           */wlan.ko)
-             cp -ar "${MOD}" "${PRONTO}"
-
-      esac
-  done
   cd $ZIP_DIR
   cp $KERN_IMG $ZIP_DIR/zImage
   make normal &>/dev/null
