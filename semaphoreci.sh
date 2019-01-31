@@ -11,7 +11,6 @@
 git clone https://github.com/fabianonline/telegram.sh telegram
 
 TELEGRAM_ID=-1001232319637
-
 TELEGRAM=telegram/telegram
 TELEGRAM_TOKEN=${BOT_API_KEY}
 
@@ -66,10 +65,17 @@ function fin() {
 
 # Main environtment
 KERNEL_DIR=${HOME}/android_kernel_xiaomi_msm8953
+
 KERN_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb
-ZIP_DIR=$KERNEL_DIR/AnyKernel2
+
+ZIP_DIR_VINCE=$KERNEL_DIR/AnyKernel2-vince
+CONFIG_VINCE=vince-perf_defconfig
+
+ZIP_DIR_SAKURA=$KERNEL_DIR/AnyKernel2-sakura
+CONFIG_SAKURA=sakura-perf_defconfig
+
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-CONFIG=vince_defconfig
+
 CORES=$(grep -c ^processor /proc/cpuinfo)
 THREAD="-j$CORES"
 CROSS_COMPILE+="ccache "
@@ -91,11 +97,8 @@ install-package --update-new ccache bc bash git-core gnupg build-essential \
 git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 --depth=1 stock
 
 # Clone AnyKernel2
-if [ "$BRANCH" = "vince/oreo-eas-miui" ]; then
-	git clone https://github.com/rama982/AnyKernel2 -b vince-miui
-else
-	git clone https://github.com/rama982/AnyKernel2 -b vince-aosp
-fi
+git clone https://github.com/rama982/AnyKernel2 AnyKernel2-vince -b vince-aosp
+git clone https://github.com/rama982/AnyKernel2 AnyKernel2-sakura -b sakura-aosp
 
 # Build start
 DATE=`date`
@@ -103,27 +106,15 @@ BUILD_START=$(date +"%s")
 
 tg_sendstick
 
-if [ "$BRANCH" = "vince/oreo-eas-miui" ]; then
-	tg_channelcast "<b>GENOM MIUI</b> kernel new build!" \
+tg_channelcast "<b>GENOM CAF</b> kernel (for Custom ROM) new build!" \
 		"Started on <code>$(hostname)</code>" \
-		"For device <b>VINCE</b> (Redmi 5 Plus)" \
+		"For device <b>VINCE</b> (Redmi 5 Plus) & <b>SAKURA</b> (Redmi 6 Pro)" \
 		"At branch <code>${BRANCH}</code>" \
 		"Under commit <code>$(git log --pretty=format:'"%h : %s"' -1)</code>" \
 		"Started on <code>$(date)</code>"
-else
-	tg_channelcast "<b>GENOM CAF</b> (AOSP) kernel new build!" \
-		"Started on <code>$(hostname)</code>" \
-		"For device <b>VINCE</b> (Redmi 5 Plus)" \
-		"At branch <code>${BRANCH}</code>" \
-		"Under commit <code>$(git log --pretty=format:'"%h : %s"' -1)</code>" \
-		"Started on <code>$(date)</code>"
-fi
 
-make  O=out $CONFIG $THREAD
-make  O=out $THREAD
-
-BUILD_END=$(date +"%s")
-DIFF=$(($BUILD_END - $BUILD_START))
+make O=out $CONFIG_VINCE $THREAD
+make O=out $THREAD
 
 if ! [ -a $KERN_IMG ]; then
 	echo -e "Kernel compilation failed, See buildlog to fix errors"
@@ -131,40 +122,33 @@ if ! [ -a $KERN_IMG ]; then
 	exit 1
 fi
 
-cd $ZIP_DIR
-make clean &>/dev/null
-cd ..
-
-# For MIUI Build
-# Credit @adekmaulana
-if [ "$BRANCH" = "vince/oreo-eas-miui" ]; then
-	OUTDIR="$PWD/out/"
-	SRCDIR="$PWD/"
-	MODULEDIR="$PWD/AnyKernel2/modules/system/lib/modules/"
-	PRONTO=${MODULEDIR}pronto/pronto_wlan.ko
-	STRIP="$PWD/stock/bin/$(echo "$(find "$PWD/stock/bin" -type f -name "aarch64-*-gcc")" | awk -F '/' '{print $NF}' |\
-sed -e 's/gcc/strip/')"
-
-	for MOD in $(find "${OUTDIR}" -name '*.ko') ; do
-		"${STRIP}" --strip-unneeded --strip-debug "${MOD}" &> /dev/null
-		"${SRCDIR}"/scripts/sign-file sha512 \
-				"${OUTDIR}/signing_key.priv" \
-				"${OUTDIR}/signing_key.x509" \
-				"${MOD}"
-		find "${OUTDIR}" -name '*.ko' -exec cp {} "${MODULEDIR}" \;
-		case ${MOD} in
-			*/wlan.ko)
-			cp -ar "${MOD}" "${PRONTO}"
-		esac
-	done
-fi
-
-cd $ZIP_DIR
-cp $KERN_IMG $ZIP_DIR/zImage
+cd $ZIP_DIR_VINCE
+cp $KERN_IMG $ZIP_DIR_VINCE/zImage
 make normal &>/dev/null
 echo Genom*.zip
 echo "Flashable zip generated under $ZIP_DIR."
+cd ..
+
+make O=out $CONFIG_SAKURA $THREAD
+make O=out $THREAD
+
+cd $ZIP_DIR_SAKURA
+cp $KERN_IMG $ZIP_DIR_SAKURA/zImage
+make normal &>/dev/null
+echo Genom*.zip
+echo "Flashable zip generated under $ZIP_DIR."
+cd ..
+
+BUILD_END=$(date +"%s")
+DIFF=$(($BUILD_END - $BUILD_START))
+
+cd $ZIP_DIR_VINCE
 push
 cd ..
+
+cd $ZIP_DIR_SAKURA
+push
+cd ..
+
 fin
 # Build end

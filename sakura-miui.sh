@@ -9,10 +9,10 @@ echo -e "$green"
 
 # Main Environment
 KERNEL_DIR=$PWD
-KERN_IMG=$KERNEL_DIR/out_vince-oreo-caf/arch/arm64/boot/Image.gz-dtb
+KERN_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb
 ZIP_DIR=$KERNEL_DIR/AnyKernel2
 CONFIG_DIR=$KERNEL_DIR/arch/arm64/configs
-CONFIG=sakura_defconfig
+CONFIG=sakura-perf_defconfig
 CORES=$(grep -c ^processor /proc/cpuinfo)
 THREAD="-j$CORES"
 CROSS_COMPILE+="ccache "
@@ -109,7 +109,6 @@ while true; do
 		echo -e "\n#######################################################################"
 
 		make O=out  $CONFIG savedefconfig &>/dev/null
-		cp out/.config arch/arm64/configs/sakura-full_defconfig &>/dev/null
 		cp out/defconfig arch/arm64/configs/$CONFIG &>/dev/null
 
 		echo -e "(i) Defconfig generated."

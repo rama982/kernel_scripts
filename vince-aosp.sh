@@ -9,10 +9,10 @@ echo -e "$green"
 
 # Main Environment
 KERNEL_DIR=$PWD
-KERN_IMG=$KERNEL_DIR/out_vince-oreo-caf/arch/arm64/boot/Image.gz-dtb
+KERN_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb
 ZIP_DIR=$KERNEL_DIR/AnyKernel2
 CONFIG_DIR=$KERNEL_DIR/arch/arm64/configs
-CONFIG=vince_defconfig
+CONFIG=vince-perf_defconfig
 CORES=$(grep -c ^processor /proc/cpuinfo)
 THREAD="-j$CORES"
 CROSS_COMPILE+="ccache "
@@ -48,7 +48,7 @@ while true; do
 	
 	if [ "$choice" == "1" ]; then
 		echo -e "\n(i) Cloning AnyKernel2 if folder not exist..."
-		git clone https://github.com/rama982/AnyKernel2 -b vince-miui
+		git clone https://github.com/rama982/AnyKernel2 -b vince-aosp
 	
 		echo -e "\n(i) Cloning toolcahins if folder not exist..."
 		git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 --depth=1 stock 
@@ -100,7 +100,6 @@ while true; do
 		echo -e "\n#######################################################################"
 
 		make O=out  $CONFIG savedefconfig &>/dev/null
-		cp out/.config arch/arm64/configs/sakura-full_defconfig &>/dev/null
 		cp out/defconfig arch/arm64/configs/$CONFIG &>/dev/null
 
 		echo -e "(i) Defconfig generated."

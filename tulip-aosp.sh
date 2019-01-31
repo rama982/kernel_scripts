@@ -12,17 +12,18 @@ KERNEL_DIR=$PWD
 KERN_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb
 ZIP_DIR=$KERNEL_DIR/AnyKernel2
 CONFIG_DIR=$KERNEL_DIR/arch/arm64/configs
-CONFIG=vince-perf_defconfig
+CONFIG=tulip-perf_defconfig
 CORES=$(grep -c ^processor /proc/cpuinfo)
 THREAD="-j$CORES"
 CROSS_COMPILE+="ccache "
 CROSS_COMPILE+="$PWD/stock/bin/aarch64-linux-android-"
+CROSS_COMPILE_ARM32="$PWD/stock32/bin/arm-linux-androideabi-"
 
 # Modules environtment
 OUTDIR="$PWD/out/"
 SRCDIR="$PWD/"
-MODULEDIR="$PWD/AnyKernel2/modules/system/lib/modules/"
-PRONTO=${MODULEDIR}pronto/pronto_wlan.ko
+SYSTEM_MODULEDIR="$PWD/AnyKernel2/modules/system/lib/modules"
+VENDOR_MODULEDIR="$PWD/AnyKernel2/modules/vendor/lib/modules"
 STRIP="$PWD/stock/bin/$(echo "$(find "$PWD/stock/bin" -type f -name "aarch64-*-gcc")" | awk -F '/' '{print $NF}' |\
 			sed -e 's/gcc/strip/')"
 
@@ -31,6 +32,7 @@ export ARCH=arm64
 export SUBARCH=arm64
 export PATH=/usr/lib/ccache:$PATH
 export CROSS_COMPILE
+export CROSS_COMPILE_ARM32
 
 # Is this logo
 echo -e "---------------------------------------------------------------------";
@@ -45,7 +47,7 @@ echo -e "---------------------------------------------------------------------";
 
 # Main script
 while true; do
-	echo -e "\n[1] Build Vince MIUI Kernel"
+	echo -e "\n[1] Build tulip MIUI Kernel"
 	echo -e "[2] Regenerate defconfig"
 	echo -e "[3] Source cleanup"
 	echo -e "[4] Create flashable zip"
@@ -56,10 +58,11 @@ while true; do
 	
 	if [ "$choice" == "1" ]; then
 		echo -e "\n(i) Cloning AnyKernel2 if folder not exist..."
-		git clone https://github.com/rama982/AnyKernel2 -b vince-miui
+		git clone https://github.com/rama982/AnyKernel2 -b tulip-miui
 	
 		echo -e "\n(i) Cloning toolcahins if folder not exist..."
 		git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 --depth=1 stock 
+		git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9 --depth=1 stock32
 	
 		echo -e ""
 		make  O=out $CONFIG $THREAD &>/dev/null
@@ -95,7 +98,7 @@ while true; do
 		BUILD_END=$(date +"%s")
 		DIFF=$(($BUILD_END - $BUILD_START))
 
-		echo -e "\n(i) Image-dtb compiled successfully."
+		echo -e "\nImage-dtb compiled successfully."
 
 		echo -e "#######################################################################"
 
@@ -108,6 +111,7 @@ while true; do
 		echo -e "\n#######################################################################"
 
 		make O=out  $CONFIG savedefconfig &>/dev/null
+		cp out/.config arch/arm64/configs/tulip-full_defconfig &>/dev/null
 		cp out/defconfig arch/arm64/configs/$CONFIG &>/dev/null
 
 		echo -e "(i) Defconfig generated."
@@ -138,26 +142,29 @@ while true; do
 		make clean &>/dev/null
 		cd ..
 	
-		for MOD in $(find "${OUTDIR}" -name '*.ko') ; do
-			"${STRIP}" --strip-unneeded --strip-debug "${MOD}" &> /dev/null
-			"${SRCDIR}"/scripts/sign-file sha512 \
-					"${OUTDIR}/signing_key.priv" \
-					"${OUTDIR}/signing_key.x509" \
-					"${MOD}"
-			find "${OUTDIR}" -name '*.ko' -exec cp {} "${MODULEDIR}" \;
-			case ${MOD} in
+		for MODULES in $(find "${OUTDIR}" -name '*.ko'); do
+			"${STRIP}" --strip-unneeded --strip-debug "${MODULES}" &> /dev/null
+			"${OUTDIR}"/scripts/sign-file sha512 \
+					"${OUTDIR}/certs/signing_key.pem" \
+					"${OUTDIR}/certs/signing_key.x509" \
+					"${MODULES}"
+			find "${OUTDIR}" -name '*.ko' -exec cp {} "${SYSTEM_MODULEDIR}" \;
+			case ${MODULES} in
+
 				*/wlan.ko)
-					cp -ar "${MOD}" "${PRONTO}"
+				cp "${MODULES}" "${VENDOR_MODULEDIR}/qca_cld3/qca_cld3_wlan.ko" ;;
+
 			esac
 		done
 		echo -e "\n(i) Done moving modules"
 
+		rm $PWD/AnyKernel2/modules/system/lib/modules/wlan.ko
 		cd $ZIP_DIR
 		cp $KERN_IMG $ZIP_DIR/zImage
 		make normal &>/dev/null
 		cd ..
 
-		echo -e "(i) Flashable zip generated under $ZIP_DIR."
+		echo -e "Flashable zip generated under $ZIP_DIR."
 
 		echo -e "#######################################################################"
 	fi
