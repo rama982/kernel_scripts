@@ -22,8 +22,8 @@ CROSS_COMPILE+="$PWD/stock/bin/aarch64-linux-android-"
 OUTDIR="$PWD/out/"
 SRCDIR="$PWD/"
 MODULEDIR="$PWD/AnyKernel2/modules/system/lib/modules/"
-PRIMA="$PWD/AnyKernel2/modules/system/vendor/lib/modules/wlan.ko"
-PRONTO="$PWD/AnyKernel2/modules/system/vendor/lib/modules/pronto/pronto_wlan.ko"
+PRIMA="$PWD/AnyKernel2/modules/vendor/lib/modules/wlan.ko"
+PRONTO="$PWD/AnyKernel2/modules/vendor/lib/modules/pronto/pronto_wlan.ko"
 STRIP="$PWD/stock/bin/$(echo "$(find "$PWD/stock/bin" -type f -name "aarch64-*-gcc")" | awk -F '/' '{print $NF}' |\
 			sed -e 's/gcc/strip/')"
 
@@ -60,7 +60,7 @@ while true; do
 		git clone https://github.com/rama982/AnyKernel2 -b sakura-miui
 	
 		echo -e "\n(i) Cloning toolcahins if folder not exist..."
-		git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 --depth=1 stock 
+		git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 -b android-9.0.0_r33 --depth=1 stock 
 	
 		echo -e ""
 		make  O=out $CONFIG $THREAD &>/dev/null
