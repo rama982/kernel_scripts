@@ -46,12 +46,12 @@ echo -e "---------------------------------------------------------------------";
 
 # Main script
 while true; do
-	echo -e "\n[1] Build Sakura MIUI Kernel"
+	echo -e "\n[1] Build Daisy Kernel"
 	echo -e "[2] Regenerate defconfig"
 	echo -e "[3] Source cleanup"
 	echo -e "[4] Create flashable zip"
 	echo -e "[5] Quit"
-	echo -ne "\n(i) Please enter a choice[1-6]: "
+	echo -ne "\n(i) Please enter a choice[1-5]: "
 	
 	read choice
 	
