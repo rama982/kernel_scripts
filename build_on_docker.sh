@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2018-2019 Rama Bondan Prakoso (rama982)
 #
-# Fedora Docker Kernel Build Script
+# Dokar Kernel Build Script
 
 # TELEGRAM START
 export CHANNEL_ID="-1001299947067"
@@ -34,20 +34,12 @@ KERNEL_DIR=$(pwd)
 KERN_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb
 CONFIG_PATH=$KERNEL_DIR/arch/arm64/configs/$CONFIG
 
-#TC
-#git clone --depth=1 https://github.com/crdroidmod/android_prebuilts_clang_host_linux-x86_clang-6607189 /root/aosp/clang && rm -rf /root/aosp/clang/.git
-#git clone --depth=1 https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 -b android-9.0.0_r50 /root/aosp/gcc-arm64 && rm -rf /root/aosp/gcc-arm64/.git
-#git clone --depth=1 https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9 -b android-9.0.0_r50 /root/aosp/gcc-arm && rm -rf /root/aosp/gcc-arm/.git
-#git clone --depth=1 https://github.com/trinket-devs/proton-clang /root/proton && rm -rf /root/proton/.git
-
 # Build kernel
-# export PATH="/root/aosp/clang/bin:/root/aosp/gcc-arm64/bin:/root/aosp/gcc-arm/bin:$PATH"
-# export LD_LIBRARY_PATH="/root/aosp/clang/lib:/root/aosp/clang/lib64:$LD_LIBRARY_PATH"
-export PATH="/root/nusantara/bin:$PATH"
-export LD_LIBRARY_PATH="/root/nusantara/lib:$LD_LIBRARY_PATH"
-export CCV="$(clang --version | head -n 1 | perl -pe 's/\((?:http|git).*?\)//gs')"
+export PATH="/root/sdclang/bin:$PATH"
+export LD_LIBRARY_PATH="/root/sdclang/lib:$LD_LIBRARY_PATH"
+export CCV="$(clang --version | sed -n "2p" | cut -d \( -f 1$CUT | sed 's/[[:space:]]*$//')"
 export LLDV="$(ld.lld --version | head -n1 | perl -pe 's/\((?:).*?\)//gs')"
-export KBUILD_COMPILER_STRING="$CCV+ $LLDV"
+export KBUILD_COMPILER_STRING="$CCV + $LLDV"
 export KBUILD_BUILD_USER="rama982"
 export KBUILD_BUILD_HOST="circleci-docker"
 export TZ="Asia/Jakarta"
@@ -69,6 +61,7 @@ build_clang () {
                           $KERNEL_CC
 }
 
+sed -i 's/WLAN=y/WLAN=m/g' "$CONFIG_PATH"
 make O=out ARCH=arm64 "$CONFIG"
 build_clang
 
@@ -83,7 +76,7 @@ git clone https://github.com/rama982/AnyKernel3
 # ENV
 ZIP_DIR=$KERNEL_DIR/AnyKernel3
 VENDOR_MODULEDIR="$ZIP_DIR/modules/vendor/lib/modules"
-STRIP="aarch64-linux-android-strip"
+STRIP="llvm-strip"
 
 # Functions
 wifi_modules () {
