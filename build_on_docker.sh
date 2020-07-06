@@ -38,27 +38,18 @@ CONFIG_PATH=$KERNEL_DIR/arch/arm64/configs/$CONFIG
 export PATH="/root/sdclang/bin:$PATH"
 export LD_LIBRARY_PATH="/root/sdclang/lib:$LD_LIBRARY_PATH"
 export CCV="$(clang --version | sed -n "2p" | cut -d \( -f 1$CUT | sed 's/[[:space:]]*$//')"
-export LLDV="$(ld.lld --version | head -n1 | perl -pe 's/\((?:).*?\)//gs')"
-export KBUILD_COMPILER_STRING="$CCV + $LLDV"
+export KBUILD_COMPILER_STRING="$CCV"
 export KBUILD_BUILD_USER="rama982"
 export KBUILD_BUILD_HOST="circleci-docker"
 export TZ="Asia/Jakarta"
 
-KERNEL_CC="CC=clang "
-KERNEL_CC+="AR=llvm-ar "
-KERNEL_CC+="NM=llvm-nm "
-KERNEL_CC+="OBJCOPY=llvm-objcopy "
-KERNEL_CC+="OBJDUMP=llvm-objdump "
-KERNEL_CC+="STRIP=llvm-strip "
-KERNEL_CC+="LD=ld.lld "
-
 build_clang () {
     make -j$(nproc --all) O=out \
                           ARCH=arm64 \
+                          CC=clang \
                           CLANG_TRIPLE=aarch64-linux-gnu- \
                           CROSS_COMPILE=aarch64-linux-gnu- \
-                          CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
-                          $KERNEL_CC
+                          CROSS_COMPILE_ARM32=arm-linux-gnueabi-
 }
 
 sed -i 's/WLAN=y/WLAN=m/g' "$CONFIG_PATH"
@@ -76,17 +67,13 @@ git clone https://github.com/rama982/AnyKernel3
 # ENV
 ZIP_DIR=$KERNEL_DIR/AnyKernel3
 VENDOR_MODULEDIR="$ZIP_DIR/modules/vendor/lib/modules"
-STRIP="llvm-strip"
+STRIP="aarch64-linux-gnu-strip"
 
 # Functions
 wifi_modules () {
     # credit @adekmaulana
     for MODULES in $(find "$KERNEL_DIR/out" -name '*.ko'); do
         "${STRIP}" --strip-unneeded --strip-debug "${MODULES}"
-        "$KERNEL_DIR/scripts/sign-file" sha512 \
-                "$KERNEL_DIR/out/signing_key.priv" \
-                "$KERNEL_DIR/out/signing_key.x509" \
-                "${MODULES}"
         case ${MODULES} in
                 */wlan.ko)
             cp "${MODULES}" "${VENDOR_MODULEDIR}/qca_cld3_wlan.ko"
