@@ -38,7 +38,8 @@ CONFIG_PATH=$KERNEL_DIR/arch/arm64/configs/$CONFIG
 export PATH="/root/sdclang/bin:$PATH"
 export LD_LIBRARY_PATH="/root/sdclang/lib:$LD_LIBRARY_PATH"
 export CCV="$(clang --version | sed -n "2p" | cut -d \( -f 1$CUT | sed 's/[[:space:]]*$//')"
-export KBUILD_COMPILER_STRING="$CCV"
+export LDV="$(ld --version | head -1)"
+export KBUILD_COMPILER_STRING="$CCV + $LDV"
 export KBUILD_BUILD_USER="rama982"
 export KBUILD_BUILD_HOST="circleci-docker"
 export TZ="Asia/Jakarta"
@@ -109,5 +110,6 @@ tg_channelcast "<b>Latest commit:</b> <a href='https://github.com/Genom-Project/
                "<b>Device:</b> $NAME" \
                "<b>Android:</b> $ANDROID" \
                "<b>Kernel:</b> $KERNEL" \
-               "<b>Toolchain:</b> $KBUILD_COMPILER_STRING" \
+               "<b>Compiler:</b> $CCV" \
+               "<b>Linker:</b> $LDV" \
                "<b>sha1sum:</b> <pre>$(sha1sum $FILEPATH | awk '{ print $1 }')</pre>"
