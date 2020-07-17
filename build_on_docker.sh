@@ -53,7 +53,6 @@ build_clang () {
                           CROSS_COMPILE_ARM32=arm-linux-gnueabi-
 }
 
-sed -i 's/WLAN=y/WLAN=m/g' "$CONFIG_PATH"
 make O=out ARCH=arm64 "$CONFIG"
 build_clang
 
