@@ -4,9 +4,17 @@
 #
 # Dokar Kernel Build Script
 
-# TELEGRAM START
-export CHANNEL_ID="-1001299947067"
+#ENV
+export CONFIG=$1
+export DEVICE=$2
+export CHANNEL_ID=$3
 
+if [ -z "$CONFIG" ] || [ -z "$DEVICE" ] || [ -z "$CHANNEL_ID" ]; then
+    echo 'one or more variable are undefined'
+    exit 1
+fi
+
+# TELEGRAM START
 git clone --depth=1 https://github.com/fabianonline/telegram.sh telegram
 
 TELEGRAM=telegram/telegram
