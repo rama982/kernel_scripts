@@ -45,7 +45,11 @@ CONFIG_PATH=$KERNEL_DIR/arch/arm64/configs/$CONFIG
 # Build kernel
 export PATH="/root/sdclang/bin:$PATH"
 export LD_LIBRARY_PATH="/root/sdclang/lib:$LD_LIBRARY_PATH"
-export CCV="$(clang --version | sed -n "2p" | cut -d \( -f 1$CUT | sed 's/[[:space:]]*$//')"
+if [ "$4" == "debian" ]; then
+    export CCV="$(clang --version | sed -n "1p" | cut -d \( -f 1$CUT | sed 's/[[:space:]]*$//')"
+else
+    export CCV="$(clang --version | sed -n "2p" | cut -d \( -f 1$CUT | sed 's/[[:space:]]*$//')"
+fi
 export LDV="$(ld --version | head -1)"
 export KBUILD_COMPILER_STRING="$CCV + $LDV"
 export KBUILD_BUILD_USER="rama982"
