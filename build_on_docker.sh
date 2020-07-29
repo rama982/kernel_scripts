@@ -43,6 +43,7 @@ KERN_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb
 CONFIG_PATH=$KERNEL_DIR/arch/arm64/configs/$CONFIG
 
 # Build kernel
+export TZ="Asia/Jakarta"
 export PATH="/root/sdclang/bin:$PATH"
 export LD_LIBRARY_PATH="/root/sdclang/lib:$LD_LIBRARY_PATH"
 if [ "$4" == "debian" ]; then
@@ -54,7 +55,7 @@ export LDV="$(ld --version | head -1)"
 export KBUILD_COMPILER_STRING="$CCV + $LDV"
 export KBUILD_BUILD_USER="rama982"
 export KBUILD_BUILD_HOST="circleci-docker"
-export TZ="Asia/Jakarta"
+export KBUILD_BUILD_TIMESTAMP=`date`
 
 build_clang () {
     make -j$(nproc --all) O=out \
@@ -123,9 +124,9 @@ COMMIT=$(git log --pretty=format:'%h: %s' -1)
 
 tg_sendstick
 tg_channelcast "<b>Latest commit:</b> <a href='https://github.com/Genom-Project/android_kernel_xiaomi_ginkgo/commits/$HASH'>$COMMIT</a>" \
-               "<b>Device:</b> $NAME" \
                "<b>Android:</b> $ANDROID" \
                "<b>Kernel:</b> $KERNEL" \
                "<b>Compiler:</b> $CCV" \
                "<b>Linker:</b> $LDV" \
-               "<b>sha1sum:</b> <pre>$(sha1sum $FILEPATH | awk '{ print $1 }')</pre>"
+               "<b>sha1sum:</b> <pre>$(sha1sum $FILEPATH | awk '{ print $1 }')</pre>" \
+               "<b>Date:</b> $KBUILD_BUILD_TIMESTAMP"
