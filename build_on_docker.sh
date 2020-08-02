@@ -38,6 +38,7 @@ tg_sendstick() {
 #BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 KERNEL_DIR=$(pwd)
 KERN_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb
+DTBO_IMG=$KERNEL_DIR/out/arch/arm64/boot/dtbo.img
 
 # Build kernel
 export TZ="Asia/Jakarta"
@@ -100,6 +101,7 @@ wifi_modules () {
 # Make zip
 wifi_modules
 cp "$KERN_IMG" "$ZIP_DIR"
+cp "$DTBO_IMG" "$ZIP_DIR"
 make -C "$ZIP_DIR" normal
 
 # Post TELEGRAM
