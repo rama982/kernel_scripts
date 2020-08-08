@@ -56,7 +56,7 @@ export KBUILD_BUILD_HOST="circleci-docker"
 KBUILD_BUILD_TIMESTAMP=$(date)
 export KBUILD_BUILD_TIMESTAMP
 if [ "$4" == "debian" ]; then
-  EXT="AR=llvm-ar"
+  EXT=" AR=llvm-ar"
   EXT+=" NM=llvm-nm"
   EXT+=" OBJCOPY=llvm-objcopy"
   EXT+=" OBJDUMP=llvm-objdump"
@@ -68,8 +68,7 @@ build_clang () {
                         CC=clang \
                         CLANG_TRIPLE=aarch64-linux-gnu- \
                         CROSS_COMPILE=aarch64-linux-gnu- \
-                        CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
-                        "$EXT"
+                        CROSS_COMPILE_ARM32=arm-linux-gnueabi-"$EXT"
 }
 
 make O=out ARCH=arm64 "$CONFIG"
