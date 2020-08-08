@@ -12,10 +12,6 @@ if [ -z "$CONFIG" ] || [ -z "$DEVICE" ] || [ -z "$CHANNEL_ID" ]; then
   exit 1
 fi
 
-if [ -z "$4" ]; then 
-  apt update && apt install -y python2
-fi
-
 # TELEGRAM START
 git clone --depth=1 https://github.com/fabianonline/telegram.sh telegram
 TELEGRAM=telegram/telegram
@@ -46,14 +42,10 @@ DTBO_IMG=$KERNEL_DIR/out/arch/arm64/boot/dtbo.img
 
 # Build kernel
 export TZ="Asia/Jakarta"
-export PATH="/root/sdclang/bin:$PATH"
-export LD_LIBRARY_PATH="/root/sdclang/lib:$LD_LIBRARY_PATH"
-if [ "$4" == "debian" ]; then
-  CCV="$(clang --version | sed -n "1p" | cut -d \( -f 1"$CUT" | sed 's/[[:space:]]*$//')"
-else
-  CCV="$(clang --version | sed -n "2p" | cut -d \( -f 1"$CUT" | sed 's/[[:space:]]*$//')"
-fi
-LDV="$(ld --version | head -1)"
+export PATH="/root/tc/bin:$PATH"
+export LD_LIBRARY_PATH="/root/tc/lib:$LD_LIBRARY_PATH"
+CCV="$(clang --version | sed -n "1p" | cut -d \( -f 1"$CUT" | sed 's/[[:space:]]*$//')"
+LDV="$(ld.lld --version | head -1)"
 export KBUILD_COMPILER_STRING="$CCV + $LDV"
 export KBUILD_BUILD_USER="rama982"
 export KBUILD_BUILD_HOST="circleci-docker"
@@ -65,6 +57,7 @@ if [ "$4" == "debian" ]; then
   EXT+=" OBJCOPY=llvm-objcopy"
   EXT+=" OBJDUMP=llvm-objdump"
   EXT+=" STRIP=llvm-strip"
+  EXT+=" LD=ld.lld"
 fi
 build_clang () {
   make -j"$(nproc --all)" O=out \
