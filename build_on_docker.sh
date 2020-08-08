@@ -55,7 +55,13 @@ export KBUILD_BUILD_USER="rama982"
 export KBUILD_BUILD_HOST="circleci-docker"
 KBUILD_BUILD_TIMESTAMP=$(date)
 export KBUILD_BUILD_TIMESTAMP
-
+if [ "$4" != "debian" ]; then
+  EXT="AR=llvm-ar"
+  EXT+=" NM=llvm-nm"
+  EXT+=" OBJCOPY=llvm-objcopy"
+  EXT+=" OBJDUMP=llvm-objdump"
+  EXT+=" STRIP=llvm-strip"
+fi
 build_clang () {
   make -j"$(nproc --all)" O=out \
                         ARCH=arm64 \
@@ -63,11 +69,7 @@ build_clang () {
                         CLANG_TRIPLE=aarch64-linux-gnu- \
                         CROSS_COMPILE=aarch64-linux-gnu- \
                         CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
-                        AR=llvm-ar \
-                        NM=llvm-nm \
-                        OBJCOPY=llvm-objcopy \
-                        OBJDUMP=llvm-objdump \
-                        STRIP=llvm-strip
+                        "$EXT"
 }
 
 make O=out ARCH=arm64 "$CONFIG"
