@@ -55,7 +55,7 @@ export KBUILD_BUILD_USER="rama982"
 export KBUILD_BUILD_HOST="circleci-docker"
 KBUILD_BUILD_TIMESTAMP=$(date)
 export KBUILD_BUILD_TIMESTAMP
-if [ "$4" != "debian" ]; then
+if [ "$4" == "debian" ]; then
   EXT="AR=llvm-ar"
   EXT+=" NM=llvm-nm"
   EXT+=" OBJCOPY=llvm-objcopy"
