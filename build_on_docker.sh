@@ -12,6 +12,10 @@ if [ -z "$CONFIG" ] || [ -z "$DEVICE" ] || [ -z "$CHANNEL_ID" ]; then
   exit 1
 fi
 
+if [ -z "$4" ]; then 
+  apt update && apt install -y python2
+fi
+
 # TELEGRAM START
 git clone --depth=1 https://github.com/fabianonline/telegram.sh telegram
 TELEGRAM=telegram/telegram
