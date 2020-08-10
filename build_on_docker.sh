@@ -78,7 +78,11 @@ if ! [ -a "$KERN_IMG" ]; then
 fi
 
 # Make zip installer
-git clone https://github.com/rama982/AnyKernel3
+if [[ "$DEVICE" != "ginkgo" ]]; then
+  git clone https://github.com/rama982/AnyKernel3 -b $DEVICE
+else
+  git clone https://github.com/rama982/AnyKernel3
+fi
 
 ZIP_DIR=$KERNEL_DIR/AnyKernel3
 VENDOR_MODULEDIR="$ZIP_DIR/modules/vendor/lib/modules"
@@ -109,7 +113,7 @@ FILEPATH=$(echo "$ZIP_DIR"/*.zip)
 HASH=$(git log --pretty=format:'%h' -1)
 COMMIT=$(git log --pretty=format:'%h: %s' -1)
 tg_sendstick
-tg_channelcast "<b>Latest commit:</b> <a href='https://github.com/Genom-Project/android_kernel_xiaomi_ginkgo/commits/$HASH'>$COMMIT</a>" \
+tg_channelcast "<b>Latest commit:</b> <a href='https://github.com/Genom-Project/android_kernel_xiaomi_$DEVICE/commits/$HASH'>$COMMIT</a>" \
                "<b>Android:</b> 10 / Q" \
                "<b>Kernel:</b> $KERNEL" \
                "<b>Compiler:</b> $CCV" \
