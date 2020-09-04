@@ -12,7 +12,7 @@ if [ -z "$CONFIG" ] || [ -z "$DEVICE" ] || [ -z "$CHANNEL_ID" ]; then
   exit 1
 fi
 
-apt update && apt install -y libssl-dev
+apt update && apt install -y libssl-dev cpio
 
 # TELEGRAM START
 git clone --depth=1 https://github.com/fabianonline/telegram.sh telegram
