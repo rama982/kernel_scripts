@@ -39,7 +39,7 @@ tg_sendstick() {
 # Main environtment
 #BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 KERNEL_DIR=$(pwd)
-KERN_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb
+KERN_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz
 DTBO_IMG=$KERNEL_DIR/out/arch/arm64/boot/dtbo.img
 
 # Build kernel
