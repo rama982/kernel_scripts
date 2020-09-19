@@ -1,24 +1,30 @@
 #!/usr/bin/env bash
-# Copyright (C) 2018-2019 Rama Bondan Prakoso (rama982)
+# Copyright (C) 2018-2020 Rama Bondan Prakoso (rama982)
 # Dokar Kernel Build Script
 
 # ENV
 export CONFIG=$1
-export DEVICE=$2
-export CHANNEL_ID=$3
+export CHANNEL_ID=$2
 
-if [ -z "$CONFIG" ] || [ -z "$DEVICE" ] || [ -z "$CHANNEL_ID" ]; then
+if [ -z "$CONFIG" ] || [ -z "$CHANNEL_ID" ]; then
   echo 'one or more variable are undefined'
   exit 1
 fi
-
-apt update && apt install -y libssl-dev cpio
 
 # TELEGRAM START
 git clone --depth=1 https://github.com/fabianonline/telegram.sh telegram
 TELEGRAM=telegram/telegram
 
 tg_channelcast() {
+  "${TELEGRAM}" -c "${CHANNEL_ID}" -H \
+      "$(
+          for POST in "${@}"; do
+              echo "${POST}"
+          done
+      )"
+}
+
+tg_fin() {
   "${TELEGRAM}" -f "$(echo "$ZIP_DIR"/*.zip)" \
   -c "${CHANNEL_ID}" -H \
       "$(
@@ -37,7 +43,6 @@ tg_sendstick() {
 # TELEGRAM END
 
 # Main environtment
-#BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 KERNEL_DIR=$(pwd)
 KERN_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz
 DTBO_IMG=$KERNEL_DIR/out/arch/arm64/boot/dtbo.img
@@ -46,14 +51,14 @@ DTBO_IMG=$KERNEL_DIR/out/arch/arm64/boot/dtbo.img
 export TZ="Asia/Jakarta"
 export PATH="/root/tc/bin:$PATH"
 export LD_LIBRARY_PATH="/root/tc/lib:$LD_LIBRARY_PATH"
-CCV="$(clang --version | sed -n "1p" | cut -d \( -f 1"$CUT" | sed 's/[[:space:]]*$//')"
-LDV="$(ld.lld --version | head -1)"
+CCV="$(clang --version | sed -n "1p" | perl -pe 's/\(.*?\)//gs')"
+LDV="$(ld.lld --version | sed -n "1p" | perl -pe 's/\(\/.*?\) //gs')"
 export KBUILD_COMPILER_STRING="$CCV + $LDV"
 export KBUILD_BUILD_USER="rama982"
 export KBUILD_BUILD_HOST="circleci-docker"
 KBUILD_BUILD_TIMESTAMP=$(date)
 export KBUILD_BUILD_TIMESTAMP
-if [ "$4" == "debian" ]; then
+if [ "$3" == "llvm" ]; then
   EXT=" AR=llvm-ar"
   EXT+=" NM=llvm-nm"
   EXT+=" OBJCOPY=llvm-objcopy"
@@ -74,17 +79,13 @@ build_clang () {
 make O=out ARCH=arm64 "$CONFIG"
 build_clang
 
-if ! [ -a "$KERN_IMG" ]; then
-  tg_channelcast "<b>BuildCI report status:</b> There are build running but its error, please fix and remove this message!"
+if ! [ $? -eq 0 ]; then
+  tg_channelcast "<b>BuildCI report status:</b> There are build running but its error, please fix!"
   exit 1
 fi
 
 # Make zip installer
-if [[ "$DEVICE" != "ginkgo" ]]; then
-  git clone https://github.com/rama982/AnyKernel3 -b $DEVICE
-else
-  git clone https://github.com/rama982/AnyKernel3
-fi
+git clone https://github.com/rama982/AnyKernel3
 
 ZIP_DIR=$KERNEL_DIR/AnyKernel3
 VENDOR_MODULEDIR="$ZIP_DIR/modules/vendor/lib/modules"
@@ -104,6 +105,7 @@ wifi_modules () {
 }
 
 # Make zip
+make -C "$ZIP_DIR" clean
 wifi_modules
 cp "$KERN_IMG" "$ZIP_DIR"
 cp "$DTBO_IMG" "$ZIP_DIR"
@@ -115,7 +117,7 @@ FILEPATH=$(echo "$ZIP_DIR"/*.zip)
 HASH=$(git log --pretty=format:'%h' -1)
 COMMIT=$(git log --pretty=format:'%h: %s' -1)
 tg_sendstick
-tg_channelcast "<b>Latest commit:</b> <a href='https://github.com/Genom-Project/android_kernel_xiaomi_$DEVICE/commits/$HASH'>$COMMIT</a>" \
+tg_fin "<b>Latest commit:</b> $COMMIT" \
                "<b>Android:</b> 10 / Q" \
                "<b>Kernel:</b> $KERNEL" \
                "<b>Compiler:</b> $CCV" \
