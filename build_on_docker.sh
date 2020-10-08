@@ -44,7 +44,7 @@ tg_sendstick() {
 
 # Main environtment
 KERNEL_DIR=$(pwd)
-KERN_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz
+KERN_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb
 DTBO_IMG=$KERNEL_DIR/out/arch/arm64/boot/dtbo.img
 
 # Build kernel
@@ -52,7 +52,11 @@ export TZ="Asia/Jakarta"
 export PATH="/root/tc/bin:$PATH"
 export LD_LIBRARY_PATH="/root/tc/lib:$LD_LIBRARY_PATH"
 CCV="$(clang --version | sed -n "1p" | perl -pe 's/\(http.*?\)//gs')"
-LDV="$(ld.lld --version | sed -n "1p" | perl -pe 's/\(\/.*?\) //gs')"
+if [ "$3" == "llvm" ]; then
+  LDV="$(ld.lld --version | sed -n "1p" | perl -pe 's/\(\/.*?\) //gs')"
+else
+  LDV="$(ld --version | sed -n "1p" | perl -pe 's/\(\/.*?\) //gs')"
+fi
 export KBUILD_COMPILER_STRING="$CCV + $LDV"
 export KBUILD_BUILD_USER="rama982"
 export KBUILD_BUILD_HOST="circleci-docker"
@@ -112,6 +116,7 @@ cp "$DTBO_IMG" "$ZIP_DIR"
 make -C "$ZIP_DIR" normal
 
 # Post TELEGRAM
+CPU=$(lscpu | sed -nr '/Model name/ s/.*:\s*(.*) @ .*/\1/p')
 KERNEL=$(cat out/include/config/kernel.release)
 FILEPATH=$(echo "$ZIP_DIR"/*.zip)
 HASH=$(git log --pretty=format:'%h' -1)
@@ -123,4 +128,5 @@ tg_fin "<b>Latest commit:</b> $COMMIT" \
                "<b>Compiler:</b> $CCV" \
                "<b>Linker:</b> $LDV" \
                "<b>sha1sum:</b> <pre>$(sha1sum "$FILEPATH" | awk '{ print $1 }')</pre>" \
-               "<b>Date:</b> $KBUILD_BUILD_TIMESTAMP"
+               "<b>Date:</b> $KBUILD_BUILD_TIMESTAMP" \
+               "<b>Build Using:</b> $CPU"
