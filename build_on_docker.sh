@@ -24,7 +24,7 @@ tg_channelcast() {
       )"
 }
 
-[[ "$3" == "new" ]] && CAM="New Cam" || CAM="Old Cam"
+[[ "$2" == "new" ]] && CAM="New Cam" || CAM="Old Cam"
 
 tg_fin() {
   "${TELEGRAM}" -f "$(echo "$ZIP_DIR"/*.zip)" \
