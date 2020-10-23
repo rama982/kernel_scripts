@@ -118,8 +118,8 @@ KERNEL=$(cat out/include/config/kernel.release)
 FILEPATH=$(echo "$ZIP_DIR"/*.zip)
 HASH=$(git log --pretty=format:'%h' -1)
 COMMIT=$(git log --pretty=format:'%h: %s' -1)
-tg_sendstick
 if [ -z "$3" ]; then
+  tg_sendstick
   tg_channelcast "<b>Latest commit:</b> $COMMIT" \
                  "<b>Android:</b> 10 / Q" \
                  "<b>Kernel:</b> $KERNEL" \
