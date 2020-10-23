@@ -3,10 +3,10 @@
 # Dokar Kernel Build Script
 
 # ENV
-export CONFIG=$1
-export CHANNEL_ID=$2
+export CHANNEL_ID=$1
+export NEW_CAM=$2
 
-if [ -z "$CONFIG" ] || [ -z "$CHANNEL_ID" ]; then
+if [ -z "$NEW_CAM" ] || [ -z "$CHANNEL_ID" ]; then
   echo 'one or more variable are undefined'
   exit 1
 fi
@@ -24,14 +24,12 @@ tg_channelcast() {
       )"
 }
 
+[[ "$3" == "new" ]] && CAM="New Cam" || CAM="Old Cam"
+
 tg_fin() {
   "${TELEGRAM}" -f "$(echo "$ZIP_DIR"/*.zip)" \
   -c "${CHANNEL_ID}" -H \
-      "$(
-          for POST in "${@}"; do
-              echo "${POST}"
-          done
-      )"
+      "$(echo "$CAM")"
 }
 
 tg_sendstick() {
@@ -80,7 +78,6 @@ build_clang () {
                         $EXT
 }
 
-make O=out ARCH=arm64 "$CONFIG"
 build_clang
 
 if ! [ $? -eq 0 ]; then
@@ -122,11 +119,14 @@ FILEPATH=$(echo "$ZIP_DIR"/*.zip)
 HASH=$(git log --pretty=format:'%h' -1)
 COMMIT=$(git log --pretty=format:'%h: %s' -1)
 tg_sendstick
-tg_fin "<b>Latest commit:</b> $COMMIT" \
-               "<b>Android:</b> 10 / Q" \
-               "<b>Kernel:</b> $KERNEL" \
-               "<b>Compiler:</b> $CCV" \
-               "<b>Linker:</b> $LDV" \
-               "<b>sha1sum:</b> <pre>$(sha1sum "$FILEPATH" | awk '{ print $1 }')</pre>" \
-               "<b>Date:</b> $KBUILD_BUILD_TIMESTAMP" \
-               "<b>Build Using:</b> $CPU"
+if [ -z "$3" ]; then
+  tg_channelcast "<b>Latest commit:</b> $COMMIT" \
+                 "<b>Android:</b> 10 / Q" \
+                 "<b>Kernel:</b> $KERNEL" \
+                 "<b>Compiler:</b> $CCV" \
+                 "<b>Linker:</b> $LDV" \
+                 "<b>sha1sum:</b> <pre>$(sha1sum "$FILEPATH" | awk '{ print $1 }')</pre>" \
+                 "<b>Date:</b> $KBUILD_BUILD_TIMESTAMP" \
+                 "<b>Build Using:</b> $CPU"
+fi
+tg_fin
